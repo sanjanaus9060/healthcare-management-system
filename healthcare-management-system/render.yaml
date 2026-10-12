@@ -1,0 +1,50 @@
+services:
+  - type: web
+    name: carebridge-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: MONGO_URL
+        sync: false
+      - key: DB_NAME
+        value: healthcare_db
+      - key: CORS_ORIGINS
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SEED_DEMO_DATA
+        value: "true"
+      - key: DEMO_DOCTOR_PASSWORD
+        sync: false
+      - key: DEMO_PATIENT_PASSWORD
+        sync: false
+      - key: AI_PROVIDER
+        value: demo
+      - key: AI_MODEL
+        sync: false
+      - key: AI_API_KEY
+        sync: false
+
+  - type: web
+    name: carebridge-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: yarn install --frozen-lockfile && CI=false yarn build
+    staticPublishPath: build
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: REACT_APP_BACKEND_URL
+        sync: false
